@@ -10,7 +10,9 @@
   "dependencies": {
     "@oclif/core": "^4",
     "@oclif/plugin-help": "^6",
-    "@oclif/plugin-plugins": "^5"
+    "@oclif/plugin-plugins": "^5",
+    "cli-ux": "^6.0.9",
+    "pdf-parse": "^1.1.1"
   },
   "devDependencies": {
     "@eslint/compat": "^1",
@@ -54,6 +56,9 @@
     ],
     "topicSeparator": " ",
     "topics": {
+      "accessibility": {
+        "description": "Process files to make them accessible"
+      },
       "hello": {
         "description": "Say hello to the world and others"
       }
