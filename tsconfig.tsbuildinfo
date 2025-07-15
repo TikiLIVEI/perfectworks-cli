@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/commands/accessibility/start.ts","./src/services/file-service.ts"],"version":"5.8.3"}
+{"root":["./src/index.ts","./src/commands/accessibility/start.ts","./src/services/file-service.ts","./src/services/perfectworks-api.ts","./src/types/files.ts"],"version":"5.8.3"}

@@ -4,11 +4,15 @@ import * as fs from 'node:fs'
 import {basename, dirname, extname, join} from 'node:path'
 
 import {FileService} from '../../services/file-service.js'
+import {PerfectWorksAPI} from '../../services/perfectworks-api.js'
+import {AIModel} from '../../types/files.js'
 
 interface AccessibilityFlags {
   'api-key': string
+  'base-url': string
   force: boolean
   input: string
+  model?: AIModel
   output: string
   verbose: boolean
 }
@@ -18,14 +22,18 @@ export default class AccessibilityStart extends Command {
   static description = 'Make files accessible by processing them through the PerfectWorks API'
   static examples = [
     `<%= config.bin %> <%= command.id %> --input ./documents --output ./accessible-docs --api-key your-api-key`,
-    `<%= config.bin %> <%= command.id %> --input document.pdf --output accessible-document.pdf --api-key your-api-key`,
-    `<%= config.bin %> <%= command.id %> -i ./files -o ./output -k your-api-key`,
+    `<%= config.bin %> <%= command.id %> --input document.pdf --output accessible-document.pdf --api-key your-api-key --model doc-veritas`,
+    `<%= config.bin %> <%= command.id %> -i ./files -o ./output -k your-api-key -m doc-lumen`,
   ]
   static flags = {
     'api-key': Flags.string({
       char: 'k',
       description: 'PerfectWorks API key',
       required: true,
+    }),
+    'base-url': Flags.string({
+      default: 'https://api.perfectworks.io/api/v0',
+      description: 'API base URL (for development/testing)',
     }),
     force: Flags.boolean({
       char: 'f',
@@ -36,6 +44,11 @@ export default class AccessibilityStart extends Command {
       char: 'i',
       description: 'Input file or directory path',
       required: true,
+    }),
+    model: Flags.string({
+      char: 'm',
+      description: 'AI model for PDF processing (doc-veritas, doc-lumen, doc-aurum)',
+      options: ['doc-veritas', 'doc-lumen', 'doc-aurum'],
     }),
     output: Flags.string({
       char: 'o',
@@ -60,59 +73,65 @@ export default class AccessibilityStart extends Command {
       this.log(`Input: ${flags.input}`)
       this.log(`Output: ${flags.output}`)
       this.log(`API Key: ${apiKey?.slice(0, 8)}...`)
+      this.log(`API Base URL: ${flags['base-url']}`)
+      if (flags.model) {
+        this.log(`AI Model: ${flags.model}`)
+      }
     }
 
-    try {
-      if (flags.verbose) {
-        this.log('Analyzing files...')
-      }
-
-      // Analyze files to show confirmation info
-      const analysis = await FileService.filesStats(flags.input)
-
-      if (flags.verbose) {
-        this.log('Analysis completed successfully')
-      }
-
-      // Show file analysis
-      this.log('\n📊 Found files info:')
-      this.log(`- PDF files count: ${analysis.pdfCount}`)
-      this.log(`- HTML files count: ${analysis.htmlCount}`)
-      this.log(`- PDF pages: ${analysis.pdfPages}`)
-      this.log(`- HTML chars count: ${analysis.htmlCharsCount}`)
-
-      if (analysis.pdfCount === 0 && analysis.htmlCount === 0) {
-        this.log('\n⚠️  No PDF or HTML files found for processing.')
-        return
-      }
-
-      // Ask for confirmation
-      const confirmed = await cli.confirm('\nDo you want to proceed with accessibility processing?')
-      if (!confirmed) {
-        this.log('Operation cancelled by user.')
-        return
-      }
-
-      // Validate input path exists
-      if (!fs.existsSync(flags.input)) {
-        this.error(`Input path does not exist: ${flags.input}`)
-      }
-
-      // Get input stats to determine if it's a file or directory
-      const inputStats = fs.statSync(flags.input)
-
-      if (inputStats.isFile()) {
-        await this.processFile(flags.input, flags.output, apiKey, flags)
-      } else if (inputStats.isDirectory()) {
-        await this.processDirectory(flags.input, flags.output, apiKey, flags)
-      } else {
-        this.error(`Input path is neither a file nor a directory: ${flags.input}`)
-      }
-
-      this.log('✅ Accessibility processing completed successfully!')
-    } catch (error) {
-      this.error(`Failed to process files: ${error instanceof Error ? error.message : String(error)}`)
+    if (flags.verbose) {
+      this.log('Analyzing files...')
     }
+
+    // Analyze files to show confirmation info
+    const analysis = await FileService.filesStats(flags.input)
+
+    if (flags.verbose) {
+      this.log('Analysis completed successfully')
+    }
+
+    // Show file analysis
+    this.log('\n📊 Found files info:')
+    this.log(`- PDF files count: ${analysis.pdfCount}`)
+    this.log(`- HTML files count: ${analysis.htmlCount}`)
+    this.log(`- PDF pages: ${analysis.pdfPages}`)
+    this.log(`- HTML chars count: ${analysis.htmlCharsCount}`)
+
+    if (analysis.pdfCount === 0 && analysis.htmlCount === 0) {
+      this.log('\n⚠️  No PDF or HTML files found for processing.')
+      return
+    }
+
+    // Ask for confirmation
+    const confirmed = await cli.confirm('\nDo you want to proceed with accessibility processing?')
+    if (!confirmed) {
+      this.log('Operation cancelled by user.')
+      return
+    }
+
+    // Validate input path exists
+    if (!fs.existsSync(flags.input)) {
+      this.error(`Input path does not exist: ${flags.input}`)
+    }
+
+    // Get input stats to determine if it's a file or directory
+    const inputStats = fs.statSync(flags.input)
+
+    if (inputStats.isFile()) {
+      await this.processFile(flags.input, flags.output, apiKey, {
+        ...flags,
+        model: flags.model as AIModel | undefined,
+      })
+    } else if (inputStats.isDirectory()) {
+      await this.processDirectory(flags.input, flags.output, apiKey, {
+        ...flags,
+        model: flags.model as AIModel | undefined,
+      })
+    } else {
+      this.error(`Input path is neither a file nor a directory: ${flags.input}`)
+    }
+
+    this.log('✅ Accessibility processing completed successfully!')
   }
 
   private async makeAccessible(
@@ -121,44 +140,34 @@ export default class AccessibilityStart extends Command {
     apiKey: string,
     flags: AccessibilityFlags,
   ): Promise<void> {
-    // Simulate API processing time
     if (flags.verbose) {
-      this.log(`Making API call for: ${basename(inputFile)}`)
+      this.log(`🚀 Processing ${basename(inputFile)} via PerfectWorks API`)
     }
 
-    // Simulate processing delay
-    await new Promise<void>((resolve) => {
-      setTimeout(resolve, 500)
-    })
-
-    // For now, just copy the file to demonstrate the flow
-    // In a real implementation, this would be replaced with actual API calls
     try {
-      const inputContent = fs.readFileSync(inputFile)
+      // Initialize PerfectWorks API client
+      const api = new PerfectWorksAPI(apiKey, flags['base-url'])
 
-      // Simulate processing by adding a comment/metadata
-      const fileExtension = extname(inputFile).toLowerCase()
-      let processedContent: Buffer
-
-      if (fileExtension === '.html') {
-        // For HTML files, add accessibility metadata as comment
-        const textContent = inputContent.toString('utf8')
-        const accessibleContent = `<!-- ACCESSIBLE VERSION - Processed by PerfectWorks API -->\n${textContent}`
-        processedContent = Buffer.from(accessibleContent, 'utf8')
-      } else {
-        // For PDF and other binary files, just copy for now
-        processedContent = inputContent
-      }
-
-      fs.writeFileSync(outputFile, processedContent)
+      // Process the file using the complete workflow
+      const result = await api.processFileComplete(inputFile, outputFile, {
+        aiModel: flags.model,
+        verbose: flags.verbose,
+      })
 
       if (flags.verbose) {
+        this.log(`✓ Original file ID: ${result.originalFile.id}`)
+        this.log(`✓ Processed file ID: ${result.processedFile.id}`)
         this.log(`✓ Processed: ${basename(inputFile)} -> ${basename(outputFile)}`)
       } else {
         this.log(`✓ ${basename(inputFile)}`)
       }
     } catch (error) {
-      this.error(`Failed to process ${inputFile}: ${error instanceof Error ? error.message : String(error)}`)
+      // Add filename to error context and display error
+      const filename = basename(inputFile)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+
+      this.log(`❌ Failed to process ${filename}: ${errorMessage}`)
+      this.exit(1)
     }
   }
 
@@ -183,8 +192,8 @@ export default class AccessibilityStart extends Command {
     // Read all files in the input directory
     const files = fs.readdirSync(inputDir, {withFileTypes: true})
 
-    // Process only files in the directory
-    const filePromises = files.map(async (file) => {
+    // Process files sequentially to better handle errors
+    for (const file of files) {
       const inputPath = join(inputDir, file.name)
       const outputPath = join(outputDir, file.name)
 
@@ -194,14 +203,16 @@ export default class AccessibilityStart extends Command {
         const ext = extname(file.name).toLowerCase()
 
         if (supportedExtensions.includes(ext)) {
-          await this.processFile(inputPath, outputPath, apiKey, flags)
+          // eslint-disable-next-line no-await-in-loop
+          await this.processFile(inputPath, outputPath, apiKey, {
+            ...flags,
+            model: flags.model as AIModel | undefined,
+          })
         } else if (flags.verbose) {
           this.log(`Skipping unsupported file type: ${file.name}`)
         }
       }
-    })
-
-    await Promise.all(filePromises)
+    }
   }
 
   private async processFile(
@@ -228,7 +239,6 @@ export default class AccessibilityStart extends Command {
       }
     }
 
-    // Simulate API call (replace with actual API call later)
     await this.makeAccessible(inputFile, outputFile, apiKey, flags)
   }
 }
