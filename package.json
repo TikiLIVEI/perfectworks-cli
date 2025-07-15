@@ -1,7 +1,7 @@
 {
   "name": "perfectworks-cli",
   "description": "PerfectWorks CLI",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "PerfectWorks",
   "bin": {
     "perfectworks-cli": "./bin/run.js"

@@ -1,0 +1,45 @@
+name: Release and Publish
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Get package version
+        id: package-version
+        run: |
+          package_version=$(node -p "require('./package.json').version")
+          echo "version=$package_version" >> $GITHUB_OUTPUT
+          echo "tag=v$package_version" >> $GITHUB_OUTPUT
+      - name: Check if release exists
+        id: release-check
+        run: |
+          if gh release view v${{ steps.package-version.outputs.version }} >/dev/null 2>&1; then
+            echo "Release v${{ steps.package-version.outputs.version }} already exists"
+            echo "::warning file=package.json,line=1::Version v${{ steps.package-version.outputs.version }} already exists - no release will be created. If you want to create a new release, please update the version in package.json and push again."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Release v${{ steps.package-version.outputs.version }} does not exist. Creating release..."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Create release
+        if: steps.release-check.outputs.exists == 'false'
+        run: |
+          gh release create ${{ steps.package-version.outputs.tag }} \
+            --title "${{ steps.package-version.outputs.tag }}" \
+            --target ${{ github.sha }} \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
