@@ -23,10 +23,10 @@ export default class AccessibilityStart extends Command {
   static args = {}
   static description = 'Make files accessible by processing them through the PerfectWorks API'
   static examples = [
-    `<%= config.bin %> <%= command.id %> --input ./documents --output ./accessible-docs --api-key your-api-key`,
-    `<%= config.bin %> <%= command.id %> --input document.pdf --output accessible-document.pdf --api-key your-api-key --model doc-veritas`,
-    `<%= config.bin %> <%= command.id %> -i ./files -o ./output -k your-api-key -m doc-lumen -c 5`,
-    `<%= config.bin %> <%= command.id %> -i ./docs -o ./accessible -k your-api-key --concurrency 2 --verbose`,
+    'perfectworks-cli accessibility start --input ./documents --output ./accessible-docs --api-key your-api-key',
+    'perfectworks-cli accessibility start --input document.pdf --output accessible-document.pdf --api-key your-api-key --model doc-veritas',
+    'perfectworks-cli accessibility start -i ./files -o ./output -k your-api-key -m doc-lumen -c 5',
+    'perfectworks-cli accessibility start -i ./docs -o ./accessible -k your-api-key --concurrency 2 --verbose',
   ]
   static flags = {
     'api-key': Flags.string({
