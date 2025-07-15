@@ -43,3 +43,37 @@ jobs:
             --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
+      - name: Set release output
+        id: release-output
+        run: |
+          echo "created=${{ steps.release-check.outputs.exists == 'false' }}" >> $GITHUB_OUTPUT
+    outputs:
+      release-created: ${{ steps.release-output.outputs.created }}
+
+  build:
+    needs: release
+    if: needs.release.outputs.release-created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - run: npm run prepack
+
+  publish-npm:
+    needs: [release, build]
+    if: needs.release.outputs.release-created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://www.npmjs.com/org/perfectworks-io/
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
