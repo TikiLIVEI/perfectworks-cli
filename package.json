@@ -24,6 +24,8 @@
     "@oclif/plugin-autocomplete": "^3.2.33",
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-not-found": "^3.2.60",
+    "@oclif/plugin-update": "^4.7.1",
+    "@oclif/plugin-version": "^2.2.31",
     "axios": "^1.10.0",
     "cli-ux": "^6.0.9",
     "pdf-parse": "^1.1.1"
@@ -56,7 +58,11 @@
   ],
   "homepage": "https://github.com/TikiLIVEI/perfectworks-cli",
   "keywords": [
-    "oclif"
+    "cli",
+    "accessibility",
+    "pdf",
+    "html",
+    "perfectworks"
   ],
   "license": "MIT",
   "main": "dist/index.js",
@@ -70,7 +76,7 @@
     },
     "theme": "theme.json",
     "plugins": [
-      "@oclif/plugin-help"
+       "@oclif/plugin-*"
     ],
     "topicSeparator": " ",
     "topics": {
