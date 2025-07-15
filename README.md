@@ -20,7 +20,7 @@ $ npm install -g perfectworks-cli
 $ perfectworks-cli COMMAND
 running command...
 $ perfectworks-cli (--version)
-perfectworks-cli/0.0.2 linux-x64 node-v20.19.3
+perfectworks-cli/0.0.3 linux-x64 node-v20.19.3
 $ perfectworks-cli --help [COMMAND]
 USAGE
   $ perfectworks-cli COMMAND
