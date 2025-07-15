@@ -9,7 +9,9 @@
   "bugs": "https://github.com/TikiLIVEI/perfectworks-cli/issues",
   "dependencies": {
     "@oclif/core": "^4",
+    "@oclif/plugin-autocomplete": "^3.2.33",
     "@oclif/plugin-help": "^6",
+    "@oclif/plugin-not-found": "^3.2.60",
     "@oclif/plugin-plugins": "^5",
     "axios": "^1.10.0",
     "cli-ux": "^6.0.9",
@@ -38,6 +40,7 @@
   "files": [
     "./bin",
     "./dist",
+    "./theme.json",
     "./oclif.manifest.json"
   ],
   "homepage": "https://github.com/TikiLIVEI/perfectworks-cli",
@@ -51,6 +54,10 @@
     "bin": "perfectworks-cli",
     "dirname": "perfectworks-cli",
     "commands": "./dist/commands",
+    "hooks": {
+      "prerun": "./dist/hooks/prerun"
+    },
+    "theme": "theme.json",
     "plugins": [
       "@oclif/plugin-help",
       "@oclif/plugin-plugins"

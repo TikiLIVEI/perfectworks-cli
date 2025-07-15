@@ -1,3 +1,0 @@
-[ACCESSIBLE VERSION - Processed by PerfectWorks API]
-
-This is a test document for accessibility processing.

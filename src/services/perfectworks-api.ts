@@ -16,6 +16,7 @@ import {
   SignedUploadUrlRequestDto,
   SignedUploadUrlResponseDto,
 } from '../types/files.js'
+import {Logger} from './logger.js'
 
 export interface APIResponse<T> {
   data: T
@@ -142,6 +143,9 @@ export class PerfectWorksAPI {
       const response: AxiosResponse<APIResponse<ProcessFileResponseDto>> = await this.client.post(
         `/files/${fileId}/accessibility`,
         request || {},
+        {
+          timeout: 5 * 60 * 1000, // 5 minutes timeout for processing
+        },
       )
       return response.data.data
     } catch (error) {
@@ -157,13 +161,14 @@ export class PerfectWorksAPI {
     outputFilePath: string,
     options?: {
       aiModel?: AIModel
+      logger?: Logger
       verbose?: boolean
     },
   ): Promise<{
     originalFile: FileResponseDto
     processedFile: FileResponseDto
   }> {
-    const {aiModel, verbose = false} = options || {}
+    const {aiModel, logger, verbose = false} = options || {}
 
     // Determine file type and content type
     const ext = extname(inputFilePath).toLowerCase()
@@ -183,7 +188,7 @@ export class PerfectWorksAPI {
     const filename = basename(inputFilePath)
     const stats = fs.statSync(inputFilePath)
 
-    if (verbose) console.log(`📤 Step 1: Generating upload URL for ${filename}`)
+    if (verbose && logger) logger.stepWithFile(1, 7, filename, 'Generating upload URL for')
 
     // Step 1: Generate upload URL
     const uploadUrlResponse = await this.generateUploadUrl({
@@ -192,12 +197,12 @@ export class PerfectWorksAPI {
       sizeBytes: stats.size,
     })
 
-    if (verbose) console.log(`📤 Step 2: Uploading file to cloud storage`)
+    if (verbose && logger) logger.stepWithFile(2, 7, filename, 'Uploading to cloud storage')
 
     // Step 2: Upload file
     await this.uploadFile(uploadUrlResponse.uploadUrl, inputFilePath, contentType)
 
-    if (verbose) console.log(`📝 Step 3: Creating file record`)
+    if (verbose && logger) logger.stepWithFile(3, 7, filename, 'Creating file record for')
 
     // Step 3: Create file record
     const originalFile = await this.createFile({
@@ -205,7 +210,7 @@ export class PerfectWorksAPI {
       objectKey: uploadUrlResponse.objectKey,
     })
 
-    if (verbose) console.log(`⚙️ Step 4: Processing file for accessibility`)
+    if (verbose && logger) logger.stepWithFile(4, 7, filename, 'Processing for accessibility')
 
     // Step 4: Process for accessibility
     const processRequest: ProcessFileAccessibilityRequestDto = {}
@@ -215,17 +220,17 @@ export class PerfectWorksAPI {
 
     const processResponse = await this.processFileAccessibility(originalFile.id, processRequest)
 
-    if (verbose) console.log(`📋 Step 5: Getting processed file details`)
+    if (verbose && logger) logger.stepWithFile(5, 7, filename, 'Getting processed file details for')
 
     // Step 5: Get processed file details
     const processedFile = await this.getFile(processResponse.processedFileId)
 
-    if (verbose) console.log(`🔗 Step 6: Generating download URL`)
+    if (verbose && logger) logger.stepWithFile(6, 7, filename, 'Generating download URL for')
 
     // Step 6: Generate download URL
     const downloadUrlResponse = await this.generateDownloadUrl(processedFile.id)
 
-    if (verbose) console.log(`📥 Step 7: Downloading processed file`)
+    if (verbose && logger) logger.stepWithFile(7, 7, filename, 'Downloading processed')
 
     // Step 7: Download processed file
     await this.downloadFile(downloadUrlResponse.downloadUrl, outputFilePath)
@@ -234,6 +239,73 @@ export class PerfectWorksAPI {
       originalFile,
       processedFile,
     }
+  }
+
+  /**
+   * Complete workflow: Process multiple files in parallel with concurrency control
+   */
+  async processFilesCompleteParallel(
+    fileProcessingTasks: Array<{
+      inputFilePath: string
+      options?: {
+        aiModel?: AIModel
+        logger?: Logger
+        verbose?: boolean
+      }
+      outputFilePath: string
+    }>,
+    concurrency: number = 3,
+  ): Promise<
+    Array<{
+      error?: string
+      inputFile: string
+      result?: {
+        originalFile: FileResponseDto
+        processedFile: FileResponseDto
+      }
+      success: boolean
+    }>
+  > {
+    const results: Array<{
+      error?: string
+      inputFile: string
+      result?: {
+        originalFile: FileResponseDto
+        processedFile: FileResponseDto
+      }
+      success: boolean
+    }> = []
+
+    // Process files in batches with concurrency limit
+    for (let i = 0; i < fileProcessingTasks.length; i += concurrency) {
+      const batch = fileProcessingTasks.slice(i, i + concurrency)
+
+      // Process current batch in parallel
+      const batchPromises = batch.map(async (task) => {
+        try {
+          const result = await this.processFileComplete(task.inputFilePath, task.outputFilePath, task.options)
+          return {
+            inputFile: task.inputFilePath,
+            result,
+            success: true,
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return {
+            error: errorMessage,
+            inputFile: task.inputFilePath,
+            success: false,
+          }
+        }
+      })
+
+      // Wait for all files in the current batch to complete
+      // eslint-disable-next-line no-await-in-loop
+      const batchResults = await Promise.all(batchPromises)
+      results.push(...batchResults)
+    }
+
+    return results
   }
 
   /**
@@ -263,15 +335,43 @@ export class PerfectWorksAPI {
       const status = error.response?.status
       const responseData = error.response?.data
 
-      // Extract error message from API response if available
-      const messageObject = {
-        context,
-        errorMessage: error.message,
-        responseData,
-        status,
+      // Extract user-friendly error message from API response if available
+      let userMessage = error.message
+      if (responseData?.message) {
+        userMessage = responseData.message
+      } else if (responseData?.error?.message) {
+        userMessage = responseData.error.message
       }
 
-      return new Error(JSON.stringify(messageObject, null, 2))
+      // For common HTTP status codes, provide more user-friendly messages
+      switch (status) {
+        case 401: {
+          userMessage = 'Invalid API key or authentication failed'
+          break
+        }
+
+        case 403: {
+          userMessage = 'Access forbidden - check your API key permissions'
+          break
+        }
+
+        case 404: {
+          userMessage = 'API endpoint not found - check your base URL'
+          break
+        }
+
+        case 429: {
+          userMessage = 'Rate limit exceeded - please try again later'
+          break
+        }
+
+        case 500: {
+          userMessage = 'Server error - please try again later'
+          break
+        }
+      }
+
+      return new Error(`${context}: ${userMessage}`)
     }
 
     // Fallback for non-axios errors
