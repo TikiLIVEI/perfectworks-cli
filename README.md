@@ -20,7 +20,7 @@ $ npm install -g perfectworks-cli
 $ perfectworks-cli COMMAND
 running command...
 $ perfectworks-cli (--version)
-perfectworks-cli/0.0.8 darwin-arm64 node-v22.17.0
+perfectworks-cli/0.0.9 darwin-arm64 node-v22.17.0
 $ perfectworks-cli --help [COMMAND]
 USAGE
   $ perfectworks-cli COMMAND
@@ -30,7 +30,10 @@ USAGE
 # Commands
 <!-- commands -->
 * [`perfectworks-cli accessibility start`](#perfectworks-cli-accessibility-start)
+* [`perfectworks-cli autocomplete [SHELL]`](#perfectworks-cli-autocomplete-shell)
 * [`perfectworks-cli help [COMMAND]`](#perfectworks-cli-help-command)
+* [`perfectworks-cli update [CHANNEL]`](#perfectworks-cli-update-channel)
+* [`perfectworks-cli version`](#perfectworks-cli-version)
 
 ## `perfectworks-cli accessibility start`
 
@@ -65,7 +68,38 @@ EXAMPLES
   $ perfectworks-cli accessibility start -i ./docs -o ./accessible -k your-api-key --concurrency 2 --verbose
 ```
 
-_See code: [src/commands/accessibility/start.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.8/src/commands/accessibility/start.ts)_
+_See code: [src/commands/accessibility/start.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.9/src/commands/accessibility/start.ts)_
+
+## `perfectworks-cli autocomplete [SHELL]`
+
+Display autocomplete installation instructions.
+
+```
+USAGE
+  $ perfectworks-cli autocomplete [SHELL] [-r]
+
+ARGUMENTS
+  SHELL  (zsh|bash|powershell) Shell type
+
+FLAGS
+  -r, --refresh-cache  Refresh cache (ignores displaying instructions)
+
+DESCRIPTION
+  Display autocomplete installation instructions.
+
+EXAMPLES
+  $ perfectworks-cli autocomplete
+
+  $ perfectworks-cli autocomplete bash
+
+  $ perfectworks-cli autocomplete zsh
+
+  $ perfectworks-cli autocomplete powershell
+
+  $ perfectworks-cli autocomplete --refresh-cache
+```
+
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v3.2.33/src/commands/autocomplete/index.ts)_
 
 ## `perfectworks-cli help [COMMAND]`
 
@@ -86,4 +120,63 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v6.2.31/src/commands/help.ts)_
+
+## `perfectworks-cli update [CHANNEL]`
+
+update the perfectworks-cli CLI
+
+```
+USAGE
+  $ perfectworks-cli update [CHANNEL] [--force |  | [-a | -v <value> |
+    -i]] [-b ]
+
+FLAGS
+  -a, --available        See available versions.
+  -b, --verbose          Show more details about the available versions.
+  -i, --interactive      Interactively select version to install. This is ignored if a channel is provided.
+  -v, --version=<value>  Install a specific version.
+      --force            Force a re-download of the requested version.
+
+DESCRIPTION
+  update the perfectworks-cli CLI
+
+EXAMPLES
+  Update to the stable channel:
+
+    $ perfectworks-cli update stable
+
+  Update to a specific version:
+
+    $ perfectworks-cli update --version 1.0.0
+
+  Interactively select version:
+
+    $ perfectworks-cli update --interactive
+
+  See available versions:
+
+    $ perfectworks-cli update --available
+```
+
+_See code: [@oclif/plugin-update](https://github.com/oclif/plugin-update/blob/v4.7.1/src/commands/update.ts)_
+
+## `perfectworks-cli version`
+
+```
+USAGE
+  $ perfectworks-cli version [--json] [--verbose]
+
+FLAGS
+  --verbose  Show additional information about the CLI.
+
+GLOBAL FLAGS
+  --json  Format output as json.
+
+FLAG DESCRIPTIONS
+  --verbose  Show additional information about the CLI.
+
+    Additionally shows the architecture, node version, operating system, and versions of plugins that the CLI is using.
+```
+
+_See code: [@oclif/plugin-version](https://github.com/oclif/plugin-version/blob/v2.2.31/src/commands/version.ts)_
 <!-- commandsstop -->
