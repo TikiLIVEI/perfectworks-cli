@@ -8,12 +8,10 @@ export interface FileInfo {
 }
 
 export interface FileAnalysis {
-  htmlCharsCount: number
   htmlCount: number
   htmlFiles: FileInfo[]
   pdfCount: number
   pdfFiles: FileInfo[]
-  pdfPages: number
 }
 
 export class FileService {
@@ -22,12 +20,10 @@ export class FileService {
    */
   static async filesStats(inputPath: string): Promise<FileAnalysis> {
     const analysis: FileAnalysis = {
-      htmlCharsCount: 0,
       htmlCount: 0,
       htmlFiles: [],
       pdfCount: 0,
       pdfFiles: [],
-      pdfPages: 0,
     }
 
     if (!fs.existsSync(inputPath)) {
@@ -73,19 +69,9 @@ export class FileService {
     if (ext === '.pdf') {
       analysis.pdfFiles.push(fileInfo)
       analysis.pdfCount++
-      // Skip page count analysis for now to avoid pdf-parse issues
-      // analysis.pdfPages += 1  // Could add a simple fallback later if needed
     } else if (ext === '.html') {
       analysis.htmlFiles.push(fileInfo)
       analysis.htmlCount++
-
-      try {
-        const content = fs.readFileSync(filePath, 'utf8')
-        analysis.htmlCharsCount += content.length
-      } catch {
-        // If we can't read the file, skip character count
-        console.warn(`Could not read HTML file: ${filePath}`)
-      }
     }
   }
 }

@@ -91,12 +91,10 @@ export class ProcessingLogger {
     }
   }
 
-  showAnalysis(analysis: {htmlCharsCount: number; htmlCount: number; pdfCount: number; pdfPages: number}): void {
-    this.logger.summary('File Analysis', [
+  showAnalysis(analysis: {htmlCount: number; pdfCount: number}): void {
+    this.logger.summary('File found', [
       {label: 'PDF files', value: analysis.pdfCount},
       {label: 'HTML files', value: analysis.htmlCount},
-      {label: 'PDF pages', value: analysis.pdfPages},
-      {label: 'HTML characters', value: analysis.htmlCharsCount.toLocaleString()},
     ])
   }
 
