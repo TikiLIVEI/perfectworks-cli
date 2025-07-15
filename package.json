@@ -1,7 +1,7 @@
 {
   "name": "perfectworks-cli",
   "description": "CLI tool for processing PDF and HTML files to make them accessible via the PerfectWorks API",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "author": "PerfectWorks",
   "bin": {
     "perfectworks-cli": "./bin/run.js"

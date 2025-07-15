@@ -20,7 +20,7 @@ $ npm install -g perfectworks-cli
 $ perfectworks-cli COMMAND
 running command...
 $ perfectworks-cli (--version)
-perfectworks-cli/0.0.7 darwin-arm64 node-v22.17.0
+perfectworks-cli/0.0.8 darwin-arm64 node-v22.17.0
 $ perfectworks-cli --help [COMMAND]
 USAGE
   $ perfectworks-cli COMMAND
@@ -65,7 +65,7 @@ EXAMPLES
   $ perfectworks-cli accessibility start -i ./docs -o ./accessible -k your-api-key --concurrency 2 --verbose
 ```
 
-_See code: [src/commands/accessibility/start.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.7/src/commands/accessibility/start.ts)_
+_See code: [src/commands/accessibility/start.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.8/src/commands/accessibility/start.ts)_
 
 ## `perfectworks-cli help [COMMAND]`
 
