@@ -14,9 +14,9 @@
     "prepack": "oclif manifest && oclif readme",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif readme && git add README.md",
-    "version:patch": "npm version patch && npm run version",
-    "version:minor": "npm version minor && npm run version",
-    "version:major": "npm version major && npm run version"
+    "version:patch": "npm version patch --no-git-tag-version && npm run version",
+    "version:minor": "npm version minor --no-git-tag-version && npm run version",
+    "version:major": "npm version major --no-git-tag-version && npm run version"
   },
   "bugs": "https://github.com/TikiLIVEI/perfectworks-cli/issues",
   "dependencies": {
