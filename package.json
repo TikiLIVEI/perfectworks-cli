@@ -1,10 +1,22 @@
 {
   "name": "perfectworks-cli",
-  "description": "PerfectWorks CLI",
+  "description": "CLI tool for processing PDF and HTML files to make them accessible via the PerfectWorks API",
   "version": "0.0.6",
   "author": "PerfectWorks",
   "bin": {
     "perfectworks-cli": "./bin/run.js"
+  },
+  "scripts": {
+    "build": "shx rm -rf dist && tsc -b",
+    "lint": "eslint",
+    "postpack": "shx rm -f oclif.manifest.json",
+    "posttest": "npm run lint",
+    "prepack": "oclif manifest && oclif readme",
+    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif readme && git add README.md",
+    "version:patch": "npm version patch && npm run version",
+    "version:minor": "npm version minor && npm run version",
+    "version:major": "npm version major && npm run version"
   },
   "bugs": "https://github.com/TikiLIVEI/perfectworks-cli/issues",
   "dependencies": {
@@ -12,7 +24,6 @@
     "@oclif/plugin-autocomplete": "^3.2.33",
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-not-found": "^3.2.60",
-    "@oclif/plugin-plugins": "^5",
     "axios": "^1.10.0",
     "cli-ux": "^6.0.9",
     "pdf-parse": "^1.1.1"
@@ -59,28 +70,15 @@
     },
     "theme": "theme.json",
     "plugins": [
-      "@oclif/plugin-help",
-      "@oclif/plugin-plugins"
+      "@oclif/plugin-help"
     ],
     "topicSeparator": " ",
     "topics": {
       "accessibility": {
         "description": "Process files to make them accessible"
-      },
-      "hello": {
-        "description": "Say hello to the world and others"
       }
     }
   },
   "repository": "TikiLIVEI/perfectworks-cli",
-  "scripts": {
-    "build": "shx rm -rf dist && tsc -b",
-    "lint": "eslint",
-    "postpack": "shx rm -f oclif.manifest.json",
-    "posttest": "npm run lint",
-    "prepack": "oclif manifest && oclif readme",
-    "test": "mocha --forbid-only \"test/**/*.test.ts\"",
-    "version": "oclif readme && git add README.md"
-  },
   "types": "dist/index.d.ts"
 }
