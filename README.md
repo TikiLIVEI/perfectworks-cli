@@ -29,8 +29,7 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`perfectworks-cli hello PERSON`](#perfectworks-cli-hello-person)
-* [`perfectworks-cli hello world`](#perfectworks-cli-hello-world)
+* [`perfectworks-cli accessibility start`](#perfectworks-cli-accessibility-start)
 * [`perfectworks-cli help [COMMAND]`](#perfectworks-cli-help-command)
 * [`perfectworks-cli plugins`](#perfectworks-cli-plugins)
 * [`perfectworks-cli plugins add PLUGIN`](#perfectworks-cli-plugins-add-plugin)
@@ -43,47 +42,40 @@ USAGE
 * [`perfectworks-cli plugins unlink [PLUGIN]`](#perfectworks-cli-plugins-unlink-plugin)
 * [`perfectworks-cli plugins update`](#perfectworks-cli-plugins-update)
 
-## `perfectworks-cli hello PERSON`
+## `perfectworks-cli accessibility start`
 
-Say hello
+Make files accessible by processing them through the PerfectWorks API
 
 ```
 USAGE
-  $ perfectworks-cli hello PERSON -f <value>
-
-ARGUMENTS
-  PERSON  Person to say hello to
+  $ perfectworks-cli accessibility start -k <value> -i <value> -o <value> [--base-url
+    <value>] [-c <value>] [-f] [-m doc-veritas|doc-lumen|doc-aurum] [-v]
 
 FLAGS
-  -f, --from=<value>  (required) Who is saying hello
+  -c, --concurrency=<value>  [default: 3] Number of files to process in parallel (1-10)
+  -f, --force                Overwrite existing output files
+  -i, --input=<value>        (required) Input file or directory path
+  -k, --api-key=<value>      (required) PerfectWorks API key
+  -m, --model=<option>       AI model for PDF processing (doc-veritas, doc-lumen, doc-aurum)
+                             <options: doc-veritas|doc-lumen|doc-aurum>
+  -o, --output=<value>       (required) Output file or directory path
+  -v, --verbose              Enable verbose logging
+      --base-url=<value>     [default: https://api.perfectworks.io/api/v0] API base URL (for development/testing)
 
 DESCRIPTION
-  Say hello
+  Make files accessible by processing them through the PerfectWorks API
 
 EXAMPLES
-  $ perfectworks-cli hello friend --from oclif
-  hello friend from oclif! (./src/commands/hello/index.ts)
+  $ perfectworks-cli accessibility start --input ./documents --output ./accessible-docs --api-key your-api-key
+
+  $ perfectworks-cli accessibility start --input document.pdf --output accessible-document.pdf --api-key your-api-key --model doc-veritas
+
+  $ perfectworks-cli accessibility start -i ./files -o ./output -k your-api-key -m doc-lumen -c 5
+
+  $ perfectworks-cli accessibility start -i ./docs -o ./accessible -k your-api-key --concurrency 2 --verbose
 ```
 
-_See code: [src/commands/hello/index.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.0/src/commands/hello/index.ts)_
-
-## `perfectworks-cli hello world`
-
-Say hello world
-
-```
-USAGE
-  $ perfectworks-cli hello world
-
-DESCRIPTION
-  Say hello world
-
-EXAMPLES
-  $ perfectworks-cli hello world
-  hello world! (./src/commands/hello/world.ts)
-```
-
-_See code: [src/commands/hello/world.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.0/src/commands/hello/world.ts)_
+_See code: [src/commands/accessibility/start.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.0/src/commands/accessibility/start.ts)_
 
 ## `perfectworks-cli help [COMMAND]`
 
