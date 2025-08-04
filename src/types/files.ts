@@ -78,12 +78,6 @@ export enum TestStatus {
   PASS = 'pass',
 }
 
-export enum AIModel {
-  DOC_AURUM = 'doc-aurum',
-  DOC_LUMEN = 'doc-lumen',
-  DOC_VERITAS = 'doc-veritas',
-}
-
 /**
  * Data transfer object for requesting a signed upload URL
  * @example {
@@ -489,14 +483,7 @@ export interface AnalyzeFileRequestDto {
 
 /**
  * Data transfer object for requesting file accessibility processing
- * @example {
- *   "model": "doc-veritas"
- * }
+ * @example {}
  */
-export interface ProcessFileAccessibilityRequestDto {
-  /**
-   * AI model to use for PDF markdown enhancement (only applicable for PDF files)
-   * @example "doc-veritas"
-   */
-  model?: AIModel
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ProcessFileAccessibilityRequestDto {}
