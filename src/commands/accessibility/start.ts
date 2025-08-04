@@ -6,7 +6,6 @@ import {basename, dirname, extname, join} from 'node:path'
 import {FileService} from '../../services/file-service.js'
 import {ConsoleLogger, ProcessingLogger} from '../../services/logger.js'
 import {PerfectWorksAPI} from '../../services/perfectworks-api.js'
-import {AIModel} from '../../types/files.js'
 
 interface AccessibilityFlags {
   'api-key': string
@@ -14,7 +13,6 @@ interface AccessibilityFlags {
   concurrency: number
   force: boolean
   input: string
-  model?: AIModel
   output: string
   verbose: boolean
 }
@@ -24,7 +22,7 @@ export default class AccessibilityStart extends Command {
   static description = 'Make files accessible by processing them through the PerfectWorks API'
   static examples = [
     'perfectworks-cli accessibility start --input ./documents --output ./accessible-docs --api-key your-api-key',
-    'perfectworks-cli accessibility start --input document.pdf --output accessible-document.pdf --api-key your-api-key --model doc-veritas',
+    'perfectworks-cli accessibility start --input document.pdf --output accessible-document.pdf --api-key your-api-key',
     'perfectworks-cli accessibility start -i ./files -o ./output -k your-api-key -m doc-lumen -c 5',
     'perfectworks-cli accessibility start -i ./docs -o ./accessible -k your-api-key --concurrency 2 --verbose',
   ]
@@ -54,11 +52,6 @@ export default class AccessibilityStart extends Command {
       char: 'i',
       description: 'Input file or directory path',
       required: true,
-    }),
-    model: Flags.string({
-      char: 'm',
-      description: 'AI model for PDF processing (doc-veritas, doc-lumen, doc-aurum)',
-      options: ['doc-veritas', 'doc-lumen', 'doc-aurum'],
     }),
     output: Flags.string({
       char: 'o',
@@ -90,9 +83,6 @@ export default class AccessibilityStart extends Command {
       logger.debug(`Output: ${flags.output}`)
       logger.debug(`API Key: ${apiKey?.slice(0, 8)}...`)
       logger.debug(`API Base URL: ${flags['base-url']}`)
-      if (flags.model) {
-        logger.debug(`AI Model: ${flags.model}`)
-      }
 
       logger.debug(`Concurrency: ${flags.concurrency}`)
     }
@@ -132,7 +122,6 @@ export default class AccessibilityStart extends Command {
     if (inputStats.isFile()) {
       const accessibilityFlags: AccessibilityFlags = {
         ...flags,
-        model: flags.model as AIModel | undefined,
       }
       await this.processFile({
         apiKey,
@@ -145,7 +134,6 @@ export default class AccessibilityStart extends Command {
     } else if (inputStats.isDirectory()) {
       const accessibilityFlags: AccessibilityFlags = {
         ...flags,
-        model: flags.model as AIModel | undefined,
       }
       await this.processDirectory({
         apiKey,
@@ -178,7 +166,6 @@ export default class AccessibilityStart extends Command {
 
       // Process the file using the complete workflow
       const result = await api.processFileComplete(inputFile, outputFile, {
-        aiModel: flags.model,
         logger,
         verbose: flags.verbose,
       })

@@ -20,7 +20,7 @@ $ npm install -g perfectworks-cli
 $ perfectworks-cli COMMAND
 running command...
 $ perfectworks-cli (--version)
-perfectworks-cli/0.0.11 darwin-arm64 node-v22.17.0
+perfectworks-cli/0.0.12 darwin-arm64 node-v22.16.0
 $ perfectworks-cli --help [COMMAND]
 USAGE
   $ perfectworks-cli COMMAND
@@ -42,15 +42,13 @@ Make files accessible by processing them through the PerfectWorks API
 ```
 USAGE
   $ perfectworks-cli accessibility start -k <value> -i <value> -o <value> [--base-url
-    <value>] [-c <value>] [-f] [-m doc-veritas|doc-lumen|doc-aurum] [-v]
+    <value>] [-c <value>] [-f] [-v]
 
 FLAGS
   -c, --concurrency=<value>  [default: 3] Number of files to process in parallel (1-10)
   -f, --force                Overwrite existing output files
   -i, --input=<value>        (required) Input file or directory path
   -k, --api-key=<value>      (required) PerfectWorks API key
-  -m, --model=<option>       AI model for PDF processing (doc-veritas, doc-lumen, doc-aurum)
-                             <options: doc-veritas|doc-lumen|doc-aurum>
   -o, --output=<value>       (required) Output file or directory path
   -v, --verbose              Enable verbose logging
       --base-url=<value>     [default: https://api.perfectworks.io/api/v0] API base URL (for development/testing)
@@ -61,14 +59,14 @@ DESCRIPTION
 EXAMPLES
   $ perfectworks-cli accessibility start --input ./documents --output ./accessible-docs --api-key your-api-key
 
-  $ perfectworks-cli accessibility start --input document.pdf --output accessible-document.pdf --api-key your-api-key --model doc-veritas
+  $ perfectworks-cli accessibility start --input document.pdf --output accessible-document.pdf --api-key your-api-key
 
   $ perfectworks-cli accessibility start -i ./files -o ./output -k your-api-key -m doc-lumen -c 5
 
   $ perfectworks-cli accessibility start -i ./docs -o ./accessible -k your-api-key --concurrency 2 --verbose
 ```
 
-_See code: [src/commands/accessibility/start.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.11/src/commands/accessibility/start.ts)_
+_See code: [src/commands/accessibility/start.ts](https://github.com/TikiLIVEI/perfectworks-cli/blob/v0.0.12/src/commands/accessibility/start.ts)_
 
 ## `perfectworks-cli autocomplete [SHELL]`
 

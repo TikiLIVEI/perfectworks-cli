@@ -3,10 +3,8 @@ import * as fs from 'node:fs'
 import {basename, dirname, extname} from 'node:path'
 
 import {
-  AIModel,
   AnalyzeFileRequestDto,
   CreateOriginalFileDto,
-  FileFormat,
   FileResponseDto,
   FileSignedDownloadUrlRequestDto,
   FileSignedDownloadUrlResponseDto,
@@ -160,7 +158,6 @@ export class PerfectWorksAPI {
     inputFilePath: string,
     outputFilePath: string,
     options?: {
-      aiModel?: AIModel
       logger?: Logger
       verbose?: boolean
     },
@@ -168,19 +165,16 @@ export class PerfectWorksAPI {
     originalFile: FileResponseDto
     processedFile: FileResponseDto
   }> {
-    const {aiModel, logger, verbose = false} = options || {}
+    const {logger, verbose = false} = options || {}
 
     // Determine file type and content type
     const ext = extname(inputFilePath).toLowerCase()
     let contentType: MimeType
-    let fileFormat: FileFormat
 
     if (ext === '.pdf') {
       contentType = MimeType.PDF
-      fileFormat = FileFormat.PDF
     } else if (ext === '.html') {
       contentType = MimeType.HTML
-      fileFormat = FileFormat.HTML
     } else {
       throw new Error(`Unsupported file type: ${ext}`)
     }
@@ -214,9 +208,6 @@ export class PerfectWorksAPI {
 
     // Step 4: Process for accessibility
     const processRequest: ProcessFileAccessibilityRequestDto = {}
-    if (fileFormat === FileFormat.PDF && aiModel) {
-      processRequest.model = aiModel
-    }
 
     const processResponse = await this.processFileAccessibility(originalFile.id, processRequest)
 
@@ -248,7 +239,6 @@ export class PerfectWorksAPI {
     fileProcessingTasks: Array<{
       inputFilePath: string
       options?: {
-        aiModel?: AIModel
         logger?: Logger
         verbose?: boolean
       }
